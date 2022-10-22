@@ -7,6 +7,9 @@
  * -------------------------------------------------------------------------------- */
 package org.centrale.worldofecn.world;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  *
  * @author ECN
@@ -18,6 +21,8 @@ public class Joueur {
     private String login;
     private String password;
     private Personnage personnage;
+
+    private List<Objet> sac;
     
     /**
      *
@@ -26,6 +31,7 @@ public class Joueur {
     public Joueur(String nom) {
         this(nom, null, null);
         joueur_id = -1;
+        this.sac = new LinkedList<>();
     }
 
     /**
@@ -103,6 +109,24 @@ public class Joueur {
     public void setPersonnage(Personnage personnage) {
         this.personnage = personnage;
     }
-    
-    
+
+    public List<Objet> getSac() {
+        return sac;
+    }
+
+    public void setSac(List<Objet> sac) {
+        this.sac = sac;
+    }
+
+    public void setSac(Object obj){
+        this.sac.add((Objet) obj);
+    }
+
+    public Integer getJoueur_id() {
+        return joueur_id;
+    }
+
+    public void setJoueur_id(Integer joueur_id) {
+        this.joueur_id = joueur_id;
+    }
 }

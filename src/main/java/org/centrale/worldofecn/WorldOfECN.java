@@ -27,7 +27,6 @@ public class WorldOfECN {
         World world = new World();
 //        world.setPlayer("Saegusa");
 //        world.getListElements().clear();
-        world.setMonde_id(2);           // inorder to test saveMonde
         
         // Test phase
         DatabaseTools database = new DatabaseTools();
@@ -37,7 +36,7 @@ public class WorldOfECN {
         Integer playerId = database.getPlayerID("Saegusa", "Mayumi");
 
 
-        database.saveWorld(playerId, "Test Game 1", "Start", world);
+//        database.saveWorld(playerId, "Test Game 1", "Start", world);
         
         // Retreive World
         database.readWorld(playerId, "Test Game 1", "Start", world);

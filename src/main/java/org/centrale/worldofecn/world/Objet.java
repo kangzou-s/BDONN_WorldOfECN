@@ -8,10 +8,7 @@
 
 package org.centrale.worldofecn.world;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 /**
  *
@@ -56,13 +53,19 @@ public abstract class Objet extends ElementDeJeu{
         if (this.getId() == -1) {                             //is the first time to save
             String sqlInsertCreature = "insert into object (obj_type_id,monde_id,coordinate_x,coordinate_y,point_de_vie)\n" +
                     "values(?,?,?,?,?)";
-            PreparedStatement prstmt = connection.prepareStatement(sqlInsertCreature);
+            PreparedStatement prstmt = connection.prepareStatement(sqlInsertCreature,Statement.RETURN_GENERATED_KEYS);
             prstmt.setInt(1, obj_type_id);
             prstmt.setInt(2, monde_id);
             prstmt.setInt(3, this.getPosition().getX());
             prstmt.setInt(4, this.getPosition().getY());
             prstmt.setInt(5, this.getPtvie());
             prstmt.executeUpdate();
+            ResultSet rs = prstmt.getGeneratedKeys();
+            rs.next();
+            this.setId(rs.getInt(1));
+            prstmt.close();
+            rs.close();
+
         }else {
             String sqlInsertCreature = "update object\n" +
                     " set coordinate_x = ?, coordinate_y =?, point_de_vie =?\n" +

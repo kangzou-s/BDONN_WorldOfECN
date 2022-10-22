@@ -49,6 +49,12 @@ public class World {
         this.setHeightWidth(height, width);
         init();
         generate();
+        // because we haven't written the code of pick object, chose person. So here we distribute by default
+        if(listElements.size() >3){
+            this.player.setPersonnage((Personnage) listElements.get(0));
+            this.player.setSac(listElements.get(listElements.size() -1));
+            this.player.setSac(listElements.get(listElements.size() -2));
+        }
     }
 
     /**
@@ -193,6 +199,7 @@ public class World {
                         item = new PotionSoin(this);
                         break;
                     case 1: // Arme
+                        item = new PotionSoin(this);
                         break;
                 }
                 item = (Objet) check(item);
@@ -260,18 +267,18 @@ public class World {
      * @param saveName
      */
     public static void  saveToDatabase(Connection connection, String gameName, String saveName, int playerId) throws SQLException {
-        if (connection != null) {
-            // Get Player ID
-
-            // Save world for Player ID
-            String sqlInsertSauvgarde = "Insert into sauvgarde (nom_sauvgarde,nom_partie,jourer_id)\n" +
-                    "values(?,?,?)";
-            PreparedStatement prstmt = connection.prepareStatement(sqlInsertSauvgarde);
-            prstmt.setString(1, saveName);
-            prstmt.setString(2, gameName);
-            prstmt.setInt(3, playerId);
-            prstmt.executeUpdate();
-        }
+//        if (connection != null) {
+//            // Get Player ID
+//
+//            // Save world for Player ID
+//            String sqlInsertSauvgarde = "Insert into sauvgarde (nom_sauvgarde,nom_partie,jourer_id)\n" +
+//                    "values(?,?,?)";
+//            PreparedStatement prstmt = connection.prepareStatement(sqlInsertSauvgarde);
+//            prstmt.setString(1, saveName);
+//            prstmt.setString(2, gameName);
+//            prstmt.setInt(3, playerId);
+//            prstmt.executeUpdate();
+//        }
     }
 
     /**
@@ -281,41 +288,33 @@ public class World {
      * @param gameName
      * @param saveName
      */
-    public void getFromDatabase(Connection connection, String gameName, String saveName) throws SQLException {
+    public void getFromDatabase(Connection connection, String gameName, String saveName,Integer idJoueur) throws SQLException {
         if (connection != null) {
             // Remove old data
             this.setHeightWidth(0, 0);
-            monde_id = -1;
             init();
+            this.getPlayer().setJoueur_id(idJoueur);
 
-            // Get Player ID
-            String sqlGetSauvgarde = "select * from sauvgarde\n" +
-                    "where nom_partie = ?";
-            PreparedStatement prstmt = connection.prepareStatement(sqlGetSauvgarde,ResultSet.TYPE_SCROLL_SENSITIVE,
-                    ResultSet.CONCUR_UPDATABLE);
-            prstmt.setString(1, gameName);
-            ResultSet rs = prstmt.executeQuery();
-            rs.next();
-            int player_id = rs.getInt(4);
-            int monde_id = rs.getInt(1);
-            monde_id = 2;      // 这里存在一个bug，由于 nom_partie unique， monde中不会更新，只有id为2的情况，但是sauvgarde中monde_id 为3
-            // 把monde最外层的参数设置好
+            // 把 monde最外层的参数设置好
             String sqlGetMonde = "select * from monde \n" +
                     "where monde_id = ?";
-            prstmt = connection.prepareStatement(sqlGetMonde);
-            prstmt.setInt(1, monde_id);
-            rs = prstmt.executeQuery();
+            PreparedStatement prstmt = connection.prepareStatement(sqlGetMonde);
+            prstmt.setInt(1, this.getMonde_id());
+            ResultSet rs = prstmt.executeQuery();
             rs.next();
-            this.monde_id = monde_id;
-            this.width = rs.getInt(3);
-            this.height = rs.getInt(4);
+            this.setWidth(rs.getInt(3));
+            this.setHeight(rs.getInt(4));
+
+            // Get Player ID
+               // have done in DatabaseTool
+
 
             // get world for Player ID
             //把玩家参数设置好
             String sqlGetPlayer = "select * from joueur \n" +
                     "where jouer_id = ?";
             prstmt = connection.prepareStatement(sqlGetPlayer);
-            prstmt.setInt(1, player_id);
+            prstmt.setInt(1, this.getPlayer().getJoueur_id());
             rs = prstmt.executeQuery();
             rs.next();
             this.getPlayer().setNom(rs.getString(2));
@@ -334,7 +333,6 @@ public class World {
             while (rs.next()){
                 int type_id = rs.getInt(2);
                 int cre_id = rs.getInt(1);
-//                int person_id = rs.getInt(1);
                 switch (type_id){
                     case 0:      //Archer
                         crea = new Archer(this);
@@ -363,7 +361,7 @@ public class World {
                         break;
                 }
             }
-
+            // select out all object from table object
             String sqlGetObject ="select * from object\n" +
                     "where monde_id = ?";
             prstmt = connection.prepareStatement(sqlGetObject,ResultSet.TYPE_SCROLL_SENSITIVE,

@@ -23,7 +23,8 @@ public abstract class Personnage extends Creature {
         super(world);
     }
 
-//    public Personnage() {
-//        super();
-//    }
+    @Override
+    public int getId() {
+        return super.getId();
+    }
 }

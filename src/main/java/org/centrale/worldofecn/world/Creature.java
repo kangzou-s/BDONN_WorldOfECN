@@ -65,16 +65,22 @@ public abstract class Creature extends ElementDeJeu {
             cre_type_id = 4;
         }
         if (this.getId() == -1) {                             //is the first time to save
+            // store in table creature
             String sqlInsertCreature = "insert into creature (cre_type_id,monde_id,coordinate_x,coordinate_y,point_de_vie)\n" +
                     "values(?,?,?,?,?)";
-            PreparedStatement prstmt = connection.prepareStatement(sqlInsertCreature);
+            PreparedStatement prstmt = connection.prepareStatement(sqlInsertCreature,Statement.RETURN_GENERATED_KEYS);
             prstmt.setInt(1, cre_type_id);
             prstmt.setInt(2, monde_id);
             prstmt.setInt(3, this.getPosition().getX());
             prstmt.setInt(4, this.getPosition().getY());
             prstmt.setInt(5, this.getPtvie());
             prstmt.executeUpdate();
-        } else {
+            ResultSet rs = prstmt.getGeneratedKeys();
+            rs.next();
+            this.setId(rs.getInt(1));
+            prstmt.close();
+            rs.close();
+        } else {              // it's not the first time, so we update information in table creature
             String sqlInsertCreature = "update creature\n" +
                     " set coordinate_x = ?, coordinate_y =?, point_de_vie =?\n" +
                     " where cre_id = ?";
@@ -84,6 +90,7 @@ public abstract class Creature extends ElementDeJeu {
             prstmt.setInt(3, this.getPtvie());
             prstmt.setInt(4, this.id);
             prstmt.executeUpdate();
+            prstmt.close();
         }
     }
 
